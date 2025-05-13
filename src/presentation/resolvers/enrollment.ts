@@ -1,4 +1,4 @@
-import { Resolver, Query, Mutation, Arg } from 'type-graphql'
+import { Resolver, Query, Mutation, Args, Int } from '@nestjs/graphql'
 import { Enrollment } from '@/src/domain/entities/enrollment'
 import { EnrollmentPrismaRepository } from '@/src/infrastructure/repositories/enrollment'
 import { EnrollStudent } from '@/src/application/use-cases/enrollment/EnrollStudent'
@@ -14,22 +14,25 @@ const getEnrollmentByStudentAndCourse = new GetEnrollmentByStudentAndCourse(enro
 export class EnrollmentResolver {
   @Mutation(() => Enrollment)
   async enroll(
-    @Arg('studentId') studentId: number,
-    @Arg('courseId') courseId: number
+    @Args('studentId', { type: () => Int }) studentId: number,
+    @Args('courseId', { type: () => Int }) courseId: number,
   ): Promise<Enrollment> {
-    return enrollStudent.execute(studentId, courseId)
+    const enrollmentData = await enrollStudent.execute(studentId, courseId)
+    return new Enrollment(enrollmentData)
   }
 
   @Query(() => Enrollment, { nullable: true })
   async enrollment(
-    @Arg('studentId') studentId: number,
-    @Arg('courseId') courseId: number
+    @Args('studentId', { type: () => Int }) studentId: number,
+    @Args('courseId', { type: () => Int }) courseId: number,
   ): Promise<Enrollment | null> {
-    return getEnrollmentByStudentAndCourse.execute(studentId, courseId)
+    const enrollment = await getEnrollmentByStudentAndCourse.execute(studentId, courseId)
+    return enrollment ? new Enrollment(enrollment) : null
   }
 
   @Query(() => [Enrollment])
   async enrollments(): Promise<Enrollment[]> {
-    return getAllEnrollments.execute()
+    const all = await getAllEnrollments.execute()
+    return all.map((e) => new Enrollment(e))
   }
 }

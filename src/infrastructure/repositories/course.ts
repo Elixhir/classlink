@@ -5,16 +5,20 @@ import { Course } from '@/src/domain/entities/course'
 const prisma = new PrismaClient()
 
 export class CoursePrismaRepository implements CourseRepository {
+
   async create(data: Omit<Course, 'id'>): Promise<Course> {
-    return await prisma.course.create({ data })
+    const createdCourse = await prisma.course.create({ data })
+    return new Course(createdCourse)
   }
 
   async findById(id: number): Promise<Course | null> {
-    return await prisma.course.findUnique({ where: { id } })
+    const course = await prisma.course.findUnique({ where: { id } })
+    if (!course) return null;
+    return new Course(course)
   }
 
   async findAll(): Promise<Course[]> {
-    return await prisma.course.findMany()
+    const courses = await prisma.course.findMany()
+    return courses.map(course => new Course(course))
   }
 }
-
