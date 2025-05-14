@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+package student;
+
+service StudentService {
+  rpc GetStudentById (StudentByIdRequest) returns (StudentResponse);
+}
+
+message StudentByIdRequest {
+  int32 id = 1;
+}
+
+message StudentResponse {
+  int32 id = 1;
+  string name = 2;
+  string email = 3;
+}
